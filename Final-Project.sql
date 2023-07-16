@@ -224,4 +224,21 @@ GROUP BY
 		WHEN awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
         WHEN awards IN ('Emmy, Oscar','Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
 		ELSE '1 award'
-	END
+	END;
+    
+    
+    SELECT 
+		CASE
+			WHEN awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
+            WHEN awards IN ('Emmy, Oscar', 'Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
+            ELSE '1 awards'
+            END as 'number_of_awards',
+            AVG(CASE WHEN actor_id IS NULL THEN 0 ELSE 1 END) AS 'percentage_with_one_film' -- we will not count actor_id = 0 because they must not have any film_id which means the actor is not listed in our film_id
+	FROM actor_award
+    
+    GROUP BY 
+		CASE
+			WHEN awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
+            WHEN awards IN ('Emmy, Oscar', 'Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
+            ELSE '1 awards'
+            END;
