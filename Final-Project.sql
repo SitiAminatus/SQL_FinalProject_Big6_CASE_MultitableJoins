@@ -171,21 +171,59 @@ SELECT
     investor.company_name
 FROM investor;
 
--- CASE NUMBER 8 -- not solved
+-- CASE NUMBER 8 
 /*
 We're interested in how well you have covered the most-awarded actors. Of all the actors with three types of
 awards, for what % of them do we carry a film? And how about for actors with two types of awards? Same
 questions. Finally, how about actors with just one award?
+
+it supposed to be :
+awards		percentage in film 
+awards 1 	
+awards 2
+awards 3
 */
 SELECT *
-FROM actor_award;
+FROM actor_award; -- 157 rows returned
 SELECT DISTINCT awards
 FROM actor_award;
 SELECT COUNT(distinct actor_award_id)
 FROM actor_award; -- 157 actors
 
 SELECT 
-	COUNT(CASE WHEN awards IN ('Emmy, Oscar, Tony') THEN actor_award_id ELSE NULL END) AS get_3_awards,
-	COUNT(CASE WHEN awards IN ('Emmy, Oscar' , 'Emmy, Tony', 'Oscar, Tony') THEN actor_award_id ELSE NULL END) AS get_2_awards,
-    COUNT(CASE WHEN awards IN ('Emmy', 'Oscar', 'Tony') THEN actor_award_id ELSE NULL END) AS get_1_award
-FROM  actor_award; -- 150 awards
+	COUNT(CASE WHEN awards IN ('Emmy, Oscar, Tony ') THEN actor_award_id ELSE NULL END) AS get_3_awards, -- 7 actors get 3 awards
+	COUNT(CASE WHEN awards IN ('Emmy, Oscar' , 'Emmy, Tony', 'Oscar, Tony') THEN actor_award_id ELSE NULL END) AS get_2_awards, -- 66 actors get 2 awards
+    COUNT(CASE WHEN awards IN ('Emmy', 'Oscar', 'Tony') THEN actor_award_id ELSE NULL END) AS get_1_award -- 84 actors get 1 award
+FROM  actor_award; 
+
+-- exploratory data analysis not relate to this case
+SELECT *
+FROM actor 
+	LEFT JOIN actor_award
+		ON actor.actor_id = actor_award.actor_id
+ORDER BY actor_award_id; -- 200 rows returned, means 43 actors have not received any award such as actor_id 3,4,7 and 40 others
+
+SELECT *
+FROM film_actor; -- 1000 rows
+SELECT DISTINCT film_id
+FROM film_actor; -- 997 rows, so there is 3 duplicate film_id either one up to three actors play 2 film_id or one actor play the same 3 film_id with other actors
+SELECT DISTINCT actor_id
+FROM film_actor; -- 200 rows returned, so we only have 200 unique actor and 997 unique film
+
+-- solution
+SELECT
+	CASE 
+		WHEN actor_award.awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
+        WHEN actor_award.awards IN ('Emmy, Oscar','Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
+		ELSE '1 award'
+	END AS number_of_awards, 
+    AVG(CASE WHEN actor_award.actor_id IS NULL THEN 0 ELSE 1 END) AS pct_w_one_film
+	
+FROM actor_award
+	
+GROUP BY 
+	CASE 
+		WHEN actor_award.awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
+        WHEN actor_award.awards IN ('Emmy, Oscar','Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
+		ELSE '1 award'
+	END
