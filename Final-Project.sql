@@ -212,18 +212,16 @@ FROM film_actor; -- 200 rows returned, so we only have 200 unique actor and 997 
 
 -- solution
 SELECT
-	CASE 
-		WHEN actor_award.awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
-        WHEN actor_award.awards IN ('Emmy, Oscar','Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
-		ELSE '1 award'
-	END AS number_of_awards, 
-    AVG(CASE WHEN actor_award.actor_id IS NULL THEN 0 ELSE 1 END) AS pct_w_one_film
+	COUNT(CASE WHEN awards IN ('Emmy, Oscar, Tony ') THEN actor_award_id ELSE NULL END) AS get_3_awards, -- 7 actors get 3 awards
+	COUNT(CASE WHEN awards IN ('Emmy, Oscar' , 'Emmy, Tony', 'Oscar, Tony') THEN actor_award_id ELSE NULL END) AS get_2_awards, -- 66 actors get 2 awards
+    COUNT(CASE WHEN awards IN ('Emmy', 'Oscar', 'Tony') THEN actor_award_id ELSE NULL END) AS get_1_award, -- 84 actors get 1 award
+    AVG(CASE WHEN actor_id IS NULL THEN 0 ELSE 1 END) AS pct_w_one_film
 	
 FROM actor_award
 	
 GROUP BY 
 	CASE 
-		WHEN actor_award.awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
-        WHEN actor_award.awards IN ('Emmy, Oscar','Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
+		WHEN awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
+        WHEN awards IN ('Emmy, Oscar','Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
 		ELSE '1 award'
 	END
